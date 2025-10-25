@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fire/Smoke Detection | Live</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#"
+          ><i class="fa-solid fa-fire-flame-curved text-danger me-2"></i
+          >Fire/Smoke AI</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav"
+          aria-controls="nav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="nav" class="collapse navbar-collapse">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">Live</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#about">About</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="py-4 border-bottom bg-hero">
+      <div class="container">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div>
+            <h1 class="h3 mb-1">Live Fire/Smoke Detection</h1>
+            <p class="text-secondary mb-0">
+              Real-time annotated stream with sensor telemetry
+            </p>
+          </div>
+          <div id="statusBadges" class="d-flex gap-2">
+            <!-- Filled by JS using /status -->
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="container py-4">
+      <div class="row g-4">
+        <!-- Stream card -->
+        <div class="col-12 col-xl-8">
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex align-items-center justify-content-between"
+            >
+              <span class="fw-semibold"
+                ><i class="fa-solid fa-video me-2"></i>Live Stream</span
+              >
+              <div class="btn-toolbar gap-2">
+                <div class="btn-group" role="group" aria-label="View">
+                  <button
+                    id="btnAnnotated"
+                    class="btn btn-outline-primary btn-sm active"
+                  >
+                    <i class="fa-solid fa-square-check me-1"></i>Annotated
+                  </button>
+                  <button id="btnRaw" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-regular fa-image me-1"></i>Raw
+                  </button>
+                </div>
+                <div class="vr"></div>
+                <button id="btnStart" class="btn btn-success btn-sm">
+                  <i class="fa-solid fa-play me-1"></i>Start
+                </button>
+                <button
+                  id="btnStop"
+                  class="btn btn-outline-warning btn-sm"
+                  disabled
+                >
+                  <i class="fa-solid fa-stop me-1"></i>Stop
+                </button>
+                <div class="vr"></div>
+                <button id="btnShot" class="btn btn-outline-info btn-sm">
+                  <i class="fa-solid fa-camera me-1"></i>Snapshot
+                </button>
+                <button id="btnFull" class="btn btn-outline-light btn-sm">
+                  <i class="fa-solid fa-expand me-1"></i>Fullscreen
+                </button>
+                <a
+                  id="openInTab"
+                  href="/video_feed"
+                  target="_blank"
+                  class="btn btn-outline-secondary btn-sm"
+                  ><i class="fa-solid fa-arrow-up-right-from-square me-1"></i
+                  >Open</a
+                >
+              </div>
+            </div>
+            <div class="ratio ratio-16x9 bg-black position-relative">
+              <img
+                id="stream"
+                alt="Live stream"
+                class="w-100 h-100 object-cover rounded-bottom"
+              />
+              <div id="offline" class="offline-overlay d-none">
+                <i class="fa-solid fa-plug-circle-xmark fa-2x mb-2"></i>
+                <div>Stream offline</div>
+                <small class="text-secondary">Check camera or server</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side info -->
+        <div class="col-12 col-xl-4">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header fw-semibold">
+              <i class="fa-solid fa-gauge-high me-2"></i>System
+            </div>
+            <div class="card-body">
+              <ul id="sysList" class="list-unstyled mb-0 small">
+                <!-- populated by JS -->
+              </ul>
+            </div>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="card-header fw-semibold">
+              <i class="fa-solid fa-satellite-dish me-2"></i>Current Sensor
+              Readings
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col">
+                  <div class="metric">
+                    <div class="metric-label">Temperature(°C)</div>
+                    <div id="m1" class="metric-value">--</div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="metric">
+                    <div class="metric-label">Humidity(%)</div>
+                    <div id="m2" class="metric-value">--</div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="metric">
+                    <div class="metric-label">MQ2 Gas Value(ppm)</div>
+                    <div id="m3" class="metric-value">--</div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-end">
+                <small id="lastUpdated" class="text-secondary"
+                  >Last update: --</small
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <section id="dashboard" class="pt-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h2 class="h5 mb-0">
+            <i class="fa-solid fa-chart-line me-2"></i>Live Charts
+          </h2>
+          <div class="text-secondary small">Auto-refresh every 5s</div>
+        </div>
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-header">Temperature(°C)</div>
+              <div class="card-body">
+                <canvas id="chart1" height="140"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-header">Humidity(%)</div>
+              <div class="card-body">
+                <canvas id="chart2" height="140"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-header">MQ2 Gas Value(ppm)</div>
+              <div class="card-body">
+                <canvas id="chart3" height="140"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section id="about" class="py-5">
+        <div class="row">
+          <div class="col-12 col-lg-8">
+            <h2 class="h5">About this project</h2>
+            <p class="text-secondary">
+              This site streams the live annotated output from a YOLO-based
+              Fire/Smoke detection pipeline. Use the controls to switch between
+              Annotated and Raw views, capture snapshots, or go fullscreen. The
+              dashboard pulls live sensor data from ThingSpeak.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="py-4 border-top">
+      <div class="container small text-secondary">
+        © <span id="year"></span> Fire/Smoke AI Dashboard
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App logic -->
+    <script src="/static/main.js" defer></script>
+  </body>
+</html>
