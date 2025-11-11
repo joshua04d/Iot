@@ -19,7 +19,7 @@ except Exception:
 # ----------------------------
 # Config
 # ----------------------------
-MODEL_PATH = "fire_smoke_yolo11s_20epochs.pt"
+MODEL_PATH = "fire_smoke_yolo11s_50epochs.pt"
 CAM_INDEX = 2
 BACKEND = cv2.CAP_DSHOW if platform.system() == "Windows" else cv2.CAP_ANY
 
